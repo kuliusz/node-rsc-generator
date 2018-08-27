@@ -1,0 +1,85 @@
+<%- include ../layouts/header.ejs %>
+
+    <% if (messages.error) { %>
+        <p style="color:red">
+            <%- messages.error %>
+        </p>
+        <% } %>
+
+            <% if (messages.success) { %>
+                <p style="color:green">
+                    <%- messages.success %>
+                </p>
+                <% } %>
+
+                    <form action="/cinemas/add" method="post" name="form1">
+                        <table width="25%" border="0">
+                            <tr>
+                                <td>Core One Adres IP</td>
+                                <td>
+                                    <input type="text" name="IPadresCoreOne" id="IPadresCoreOne" value="<%= IPadresCoreOne %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Core Two Adres IP</td>
+                                <td>
+                                    <input type="text" name="IPadresCoreTwo" id="IPadresCoreTwo" value="<%= IPadresCoreOne %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Nazwa 1</td>
+                                <td>
+                                    <input type="text" name="Nazwa1" id="Nazwa1" value="<%= Nazwa1 %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Nazwa 2</td>
+                                <td>
+                                    <input type="text" name="Nazwa2" id="Nazwa2" value="<%= Nazwa2 %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Password VPN 1</td>
+                                <td>
+                                    <input type="text" name="VPNpass1" id="VPNpass1" value="<%= VPNpass1 %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Password VPN2 </td>
+                                <td>
+                                    <input type="text" name="VPNpass2" id="VPNpass2" value="<%= VPNpass2 %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Adres IP VLAN 10 admin</td>
+                                <td>
+                                    <input type="text" name="IP_adresVLAN10admin" id="IP_adresVLAN10admin" value="<%= IP_adresVLAN10admin %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Net Mask VLAN 10</td>
+                                <td>
+                                    <input type="text" name="NetMaskVLAN10admin" id="NetMaskVLAN10admin" value="<%= NetMaskVLAN10admin %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>POOL VLAN10 START</td>
+                                <td>
+                                    <input type="text" name="VLAN10poolStart" id="VLAN10poolStart" value="<%= VLAN10poolStart %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>POOL VLAN10 END</td>
+                                <td>
+                                    <input type="text" name="VLAN10poolEnd" id="VLAN10poolEnd" value="<%= VLAN10poolEnd %>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <input type="submit" name="Submit" value="Add" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                    <%- include ../layouts/footer.ejs %>

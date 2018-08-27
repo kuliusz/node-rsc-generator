@@ -1,0 +1,75 @@
+<!--
+including header content which is common for all pages
+-->
+<%- include ../layouts/header.ejs %>
+
+    <% if (messages.error) { %>
+        <p style="color:red">
+            <%- messages.error %>
+        </p>
+        <% } %>
+
+            <% if (messages.success) { %>
+                <p style="color:green">
+                    <%- messages.success %>
+                </p>
+                <% } %>
+
+                    <table width='80%' border=0>
+
+                        <tr style='text-align:left; background-color:#CCC'>
+                            <th>IPadresCoreOne</th>
+                            <th>IPadresCoreTwo</th>
+                            <th>Nazwa1</th>
+                            <th>Nazwa2</th>
+                            <th>VPNpass1</th>
+                            <th>VPNpass2</th>
+                            <th>Network</th>
+                            <th>IP_adresVLAN10admin</th>
+                            <th>NetMaskVLAN10admin</th>
+                            <th>VLAN10poolStart</th>
+                            <th>VLAN10poolEnd</th>
+                        </tr>
+
+                        <% if (data) { %>
+                            <% data.forEach(function(cinema){ %>
+                                <tr>
+                                    <td>
+                                        <%= cinema.IPadresCoreOne %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.IPadresCoreTwo %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.Nazwa1 %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.Nazwa2 %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.VPNpass1 %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.VPNpass2 %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.Network %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.IP_adresVLAN10admin %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.NetMaskVLAN10admin %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.VLAN10poolStart %>
+                                    </td>
+                                    <td>
+                                        <%= cinema.VLAN10poolEnd %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } %>
+
+                    </table>
+                    <%- include ../layouts/footer.ejs %>
