@@ -1,5 +1,35 @@
 <%- include layouts/header.ejs %>
 
-
+    <form action="/" method="POST">
+        <label>Adres VLAN10:</label>
+        <br />
+        <input type="text" name="IPaddress" placeholder="Adres IP" />
+        <br />
+        <label>NETWORK VLAN10:</label>
+        <br />
+        <input type="text" name="NetMask" placeholder="Maska sieciowa" />
+        <br />
+        <label>Brama domyślna:</label>
+        <br />
+        <input type="text" name="Gateway" placeholder="Brama domyślna" />
+        <br />
+        <label>POOL VLAN 10 FIRST:</label>
+        <br />
+        <input type="text" name="NetworkAddress" placeholder="Adres sieci" />
+        <br />
+        <label>PASSWORD DO PPTP:</label>
+        <br />
+        <input type="text" name="prov" placeholder="Provisioning" />
+        <br />
+        <label>Nazwa Mikrotika:</label>
+        <br />
+        <input type="text" name="Name" placeholder="Nazwa" />
+        <br />
+        <label>POOL VLAN10 LAST:</label>
+        <br />
+        <input type="text" name="netAddLast" placeholder="Rejestracja" />
+        <br />
+        <input type="submit" name="generate" value="Generuj">
+    </form>
 
     <%- include layouts/footer.ejs %>

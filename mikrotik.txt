@@ -1,0 +1,315 @@
+# jul/21/2016 16:24:10 by RouterOS 6.34.6
+#
+/caps-man channel
+add band=2ghz-g/n control-channel-width=20mhz extension-channel=disabled \
+    frequency=2412 name=2.4G
+/interface bridge
+add fast-forward=no name=bridge_cap
+add fast-forward=no name=bridge_office
+/interface ethernet
+set [ find default-name=ether1 ] comment="WAN ITSA"
+set [ find default-name=ether2 ] comment=office
+set [ find default-name=ether3 ] comment=office
+set [ find default-name=ether4 ] comment="UNIFI AP "
+set [ find default-name=ether5 ] comment="UNIFI AP "
+/interface pptp-client
+add connect-to=82.214.139.100 disabled=no name=afo_aaan1 password=\
+    ".replace['prov']." user=".replace['Name']."
+add connect-to=82.214.139.94 disabled=no name=afo_aaan2 password=".replace['prov']." \
+    user=".replace['Name']."
+add comment=biurko connect-to=82.214.139.103 name=pptp-out1 password=43211 \
+    user=eoip
+/interface vlan
+add comment="VLAN administracyjny" interface=bridge_cap name=vlan10_admin \
+    vlan-id=10
+add comment="VLAN sieci Aforte NetWorks!" interface=bridge_cap name=\
+    vlan20_anw vlan-id=20
+add comment="VLAN sieci office" interface=bridge_cap name=vlan21_office \
+    vlan-id=21
+add comment="VLAN sieci welcome" interface=bridge_cap name=vlan30_welcome \
+    vlan-id=30
+/caps-man datapath
+add bridge=bridge_cap name=welcome vlan-id=30 vlan-mode=use-tag
+/caps-man security
+add encryption=aes-ccm group-encryption=aes-ccm name=open
+/caps-man configuration
+add channel=2.4G country=poland datapath=welcome max-sta-count=30 mode=ap \
+    multicast-helper=full name=welcome security=open ssid=Cinema
+/caps-man interface
+add configuration=welcome disabled=no l2mtu=1600  master-interface=none name=2.4Ghz-birko_r-1
+/interface list
+add exclude=dynamic name=discover
+/ip hotspot profile
+set [ find default=yes ] html-directory=flash/hotspot
+add hotspot-address=10.1.2.1 html-directory=flash/spotitsa \
+    http-cookie-lifetime=1d login-by=cookie,http-chap,http-pap,mac-cookie \
+    name=welcome use-radius=yes
+/ip hotspot user profile
+set [ find default=yes ] mac-cookie-timeout=1d rate-limit=2M/4M shared-users=\
+    100
+/ip pool
+add name=pool1_anw ranges=10.1.1.20-10.1.1.200
+add name=pool2_hotspot ranges=10.1.2.10-10.1.2.250
+add name=pool3_office ranges=192.168.10.20-192.168.10.190
+add name=pool4_vlan10_admin ranges=".replace['NetworkAddress']."-".replace['PBX']."
+/ip dhcp-server
+add add-arp=yes address-pool=pool1_anw authoritative=after-2sec-delay \
+    disabled=no interface=vlan20_anw lease-time=1d10m name=dhcp1_anw \
+    src-address=10.1.1.1
+add add-arp=yes address-pool=pool3_office authoritative=after-2sec-delay \
+    disabled=no interface=bridge_office lease-time=11h name=dhcp3_office
+add add-arp=yes address-pool=pool2_hotspot authoritative=after-2sec-delay \
+    disabled=no interface=vlan30_welcome lease-time=10h name=dhcp2_welcome \
+    src-address=10.1.2.1
+add address-pool=pool4_vlan10_admin disabled=no interface=vlan10_admin name=\
+    dhcp4_vlan10_admin
+/ip hotspot
+add address-pool=pool2_hotspot disabled=no interface=vlan30_welcome name=\
+    hotspot1 profile=welcome
+add address-pool=pool2_hotspot interface=vlan30_welcome name=error-page
+/ppp profile
+add change-tcp-mss=no name=pptp
+/queue simple
+add limit-at=3500k/3500k max-limit=3500k/3500k name=welcome target=\
+    vlan30_welcome
+add limit-at=1500k/1500k max-limit=1500k/1500k name=techniczna target=\
+    bridge_office
+/snmp community
+set [ find default=yes ] addresses=0.0.0.0/0 authentication-password=mko09ijn \
+    encryption-password=mko09ijn encryption-protocol=AES name=afo_publicv3
+/system logging action
+set 0 memory-lines=100
+set 1 disk-lines-per-file=100
+add name=zdalny remote=10.10.10.236 src-address=".replace['IPaddress']." target=remote
+/user group
+set write policy="local,telnet,ssh,ftp,reboot,read,write,test,winbox,password,\
+    web,sniff,sensitive,api,romon,tikapp,!policy,!dude"
+add name=admin policy="local,telnet,ssh,reboot,read,write,test,winbox,password\
+    ,sniff,sensitive,api,romon,tikapp,!ftp,!policy,!web,!dude"
+add name=readdude policy="local,telnet,ssh,reboot,read,test,winbox,web,sniff,s\
+    ensitive,api,romon,dude,tikapp,!ftp,!write,!policy,!password"
+/caps-man manager
+set enabled=yes
+/caps-man provisioning
+add action=create-enabled master-configuration=welcome name-format=\
+    prefix-identity name-prefix=2.4Ghz
+/interface bridge port
+add bridge=bridge_office interface=vlan21_office
+add bridge=bridge_office disabled=yes interface=ether3
+add bridge=bridge_office interface=ether2
+add bridge=bridge_cap interface=ether4
+add bridge=bridge_cap interface=ether5
+/ip neighbor discovery-settings
+set discover-interface-list=discover
+/interface list member
+add interface=ether1 list=discover
+add interface=ether2 list=discover
+add interface=ether3 list=discover
+add interface=ether4 list=discover
+add interface=ether5 list=discover
+add interface=bridge_office list=discover
+add interface=vlan10_admin list=discover
+add interface=vlan20_anw list=discover
+add interface=vlan21_office list=discover
+add interface=vlan30_welcome list=discover
+add interface=bridge_cap list=discover
+/ip address
+add address=10.1.1.1/24 interface=vlan20_anw network=10.1.1.0
+add address=10.1.2.1/24 interface=vlan30_welcome network=10.1.2.0
+add address=192.168.10.1/24 interface=bridge_office network=192.168.10.0
+add address=".replace['IPaddress']."/29 interface=vlan10_admin network=".replace['NetMask']."
+/ip dhcp-client
+add dhcp-options=hostname,clientid disabled=no interface=ether1
+/ip dhcp-server network
+add address=10.1.1.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=10.1.1.1
+add address=10.1.2.0/23 dns-server=8.8.8.8,8.8.4.4 gateway=10.1.2.1
+add address=".replace['NetMask']."/29 gateway=".replace['IPaddress']."
+add address=192.168.10.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=192.168.10.1
+/ip dns
+set servers=217.67.221.117,213.161.99.99
+/ip dns static
+add address=10.10.12.12 name=spot.itsa.pl
+/ip firewall address-list
+add address=10.1.1.0/24 list="VLAN 20 CLIENTS"
+add address=192.168.10.0/24 list="VLAN 21 CLIENTS"
+add address=10.1.2.0/23 list="VLAN 30 CLIENTS"
+add address=10.10.10.0/24 list=CORE
+add address=10.10.11.0/24 list=CORE
+add address=10.100.10.0/24 list=CORE
+add address=10.100.20.0/24 list=CORE
+add address=213.161.97.0/28 list=CORE
+add address=213.161.96.8/30 list=CORE
+add address=82.214.139.88/29 list=CORE
+add address=82.214.139.96/28 list=CORE
+add address=217.67.221.118 comment="!!! Poprawi\E6 na docelowy IP" list=\
+    WAN_IP
+add address=".replace['NetMask']."/29 list="LOCAL AP MGMT"
+add address=".replace['IPaddress']." list="ROUTER IP"
+add address=10.100.11.0/24 list=CORE
+add address=217.67.192.145 list=CORE
+add address=213.161.96.14 list=CORE
+add address=213.161.97.6 list=CORE
+add address=10.10.12.0/24 list=CORE
+/ip firewall filter
+add action=passthrough chain=unused-hs-chain comment=\
+    "place hotspot rules here"
+add action=accept chain=input comment=\
+    "ACCEPT ESTABLISHED CONNECTION ACCESS PACKETS TO ROUTER" \
+    connection-state=established
+add action=accept chain=input comment=\
+    "ACCEPT RELATED CONNECTION ACCESS PACKETS TO ROUTER" connection-state=\
+    related
+add action=drop chain=input comment=\
+    "DROP INVALID CONNECTION ACCESS PACKETS TO ROUTER" connection-state=\
+    invalid
+add action=accept chain=forward comment=\
+    "ACCEPT ESTABLISHED CONNECTION PACKETS" connection-state=established
+add action=accept chain=forward comment="ACCEPT RELATED CONNECTION PACKETS" \
+    connection-state=related
+add action=drop chain=forward comment="DROP INVALID CONNECTION PACKETS" \
+    connection-state=invalid
+add action=accept chain=input comment=\
+    "ACCEPT CONNECTIONS FROM CORE NETWORK TO ROUTER" src-address-list=CORE
+add action=accept chain=input comment=\
+    "ACCEPT CONNECTIONS FROM LOCAL AP MGMT NETWORK TO ROUTER" \
+    src-address-list="LOCAL AP MGMT"
+add action=add-src-to-address-list address-list=first_knock \
+    address-list-timeout=15s chain=input comment=\
+    "PORT KNOCKING TO ACCESS ROUTER ON WAN_IP" dst-address-list=WAN_IP \
+    dst-port=4568 protocol=tcp
+add action=add-src-to-address-list address-list=second_knock \
+    address-list-timeout=15s chain=input comment=\
+    "PORT KNOCKING TO ACCESS ROUTER ON WAN_IP" dst-address-list=WAN_IP \
+    dst-port=7668 protocol=tcp src-address-list=first_knock
+add action=add-src-to-address-list address-list=accepted_from_knocking \
+    address-list-timeout=1h chain=input comment=\
+    "PORT KNOCKING TO ACCESS ROUTER ON WAN_IP - CREATE ACCEPTED LIST FOR 1h " \
+    dst-address-list=WAN_IP dst-port=47146 protocol=tcp src-address-list=\
+    second_knock
+add action=log chain=input comment="LOG ATTEMPTS TO ACCESS ROUTER" dst-port=\
+    22,23,8291 log-prefix=Filter: protocol=tcp
+add action=log chain=input comment="LOG ALL TO ROUTER INPUT" log-prefix=\
+    LOG_all:
+add action=drop chain=input comment="PORT KNOCKING - DROP ELSE ON WAN IP ADDRE\
+    SS WITHOUT PORT KNOCKING ACCEPTED LIST" dst-address-list=WAN_IP \
+    src-address-list=!accepted_from_knocking
+add action=drop chain=input comment="DENY VLAN20 ROUTER ACCESS" \
+    src-address-list="VLAN 20 CLIENTS"
+add action=drop chain=input comment="DENY VLAN30 ROUTER ACCESS" \
+    src-address-list="VLAN 30 CLIENTS"
+add action=drop chain=input comment="DROP SSH, WINBOX BRUTE FORCES PASSWORD CR\
+    ACKING AFTER KNOCKING IS CORRECT" dst-port=22,8291 protocol=tcp \
+    src-address-list=brutal_force_blacklist
+add action=add-src-to-address-list address-list=brutal_force_blacklist \
+    address-list-timeout=1d chain=input connection-state=new dst-port=22,8291 \
+    protocol=tcp src-address-list=brutal_force_stage3
+add action=add-src-to-address-list address-list=brutal_force_stage3 \
+    address-list-timeout=1m chain=input connection-state=new dst-port=22,8291 \
+    protocol=tcp src-address-list=brutal_force_stage2
+add action=add-src-to-address-list address-list=brutal_force_stage2 \
+    address-list-timeout=1m chain=input connection-state=new dst-port=22,8291 \
+    protocol=tcp src-address-list=brutal_force_stage1
+add action=add-src-to-address-list address-list=brutal_force_stage1 \
+    address-list-timeout=1m chain=input connection-state=new dst-port=22,8291 \
+    protocol=tcp
+add action=drop chain=input comment="drop ftp brute forcers" dst-port=21 \
+    protocol=tcp src-address-list=ftp_blacklist
+add action=accept chain=output content="530 Login incorrect" dst-limit=\
+    1/1m,9,dst-address/1m protocol=tcp
+add action=add-dst-to-address-list address-list=ftp_blacklist \
+    address-list-timeout=3h chain=output content="530 Login incorrect" \
+    protocol=tcp
+add action=accept chain=input comment="PORT KNOCKING - ACCEPTED DYNAMIC IP FRO\
+    M CORRECT KNOCK COMBINATION ON WAN_IP" dst-address-list=WAN_IP dst-port=\
+    22,8291 protocol=tcp src-address-list=accepted_from_knocking
+add action=drop chain=forward comment=\
+    "DROP NON-HTTP(S) TRAFFIC VLAN30 CLIENTS (WELCOME)" dst-port=\
+    !80,443,25,587,465,110,995,143,993 protocol=tcp src-address-list=\
+    "VLAN 30 CLIENTS"
+add action=drop chain=forward comment="DENY LAN TO OTHER RESOURCES" \
+    out-interface=!ether1 src-address-list="LAN CLIENTS"
+add action=drop chain=forward comment="DENY VLAN20 TO OTHER RESOURCES" \
+    out-interface=!ether1 src-address-list="VLAN 20 CLIENTS"
+add action=drop chain=forward comment="DENY VLAN21 TO OTHER RESOURCES" \
+    out-interface=!ether1 src-address-list="VLAN 21 CLIENTS"
+add action=drop chain=forward comment="DENY VLAN30 TO OTHER RESOURCES" \
+    out-interface=!ether1 src-address-list="VLAN 30 CLIENTS"
+add action=drop chain=input comment="External DNS request drop" dst-port=53 \
+    in-interface=ether1 protocol=tcp
+add action=drop chain=input comment="External DNS request drop" dst-port=53 \
+    in-interface=ether1 protocol=udp
+add action=drop chain=input comment="External NTP request drop" dst-port=123 \
+    in-interface=ether1 protocol=udp
+add action=drop chain=input comment="DROP ELSE" disabled=yes
+/ip firewall nat
+add action=passthrough chain=unused-hs-chain comment=\
+    "place hotspot rules here" disabled=yes
+add action=masquerade chain=srcnat dst-address=10.10.12.12 out-interface=\
+    afo_aaan2
+add action=masquerade chain=srcnat comment=ANW dst-address=0.0.0.0/0 \
+    out-interface=ether1 src-address=10.1.1.0/24
+add action=masquerade chain=srcnat comment=office dst-address=0.0.0.0/0 \
+    out-interface=ether1 src-address=192.168.10.0/24
+add action=masquerade chain=srcnat comment=welcome dst-address=0.0.0.0/0 \
+    out-interface=ether1 src-address=10.1.2.0/24
+add action=masquerade chain=srcnat comment="unifi vlan10" dst-address=\
+    0.0.0.0/0 out-interface=ether1 src-address=".replace['NetMask']."/29
+/ip firewall service-port
+set ftp disabled=yes
+/ip hotspot user
+add disabled=yes name=admin password=admin
+/ip hotspot walled-garden
+add dst-host=spot.itsa.pl*
+add dst-host=10.10.12.12*
+add dst-host=*.hotspot.aforte.com.pl*
+add dst-host=hotspots.pt
+add dst-host=*hotspots.aforte.net*
+add dst-host=:^www.apple.com
+add dst-host=:^www.airport.us
+add dst-host=:^www.itools.info
+add dst-host=:^www.appleiphonecell.com
+add dst-host=:^www.thinkdifferent.us
+add dst-host=:^www.ibook.info
+add dst-host=captive.apple.com dst-port=443
+add dst-host=*.android.com
+add dst-host=code.jquery.com
+add dst-host=*akamai*
+add dst-host=*.google.pl dst-port=443
+add dst-host=*.google.com dst-port=80
+add dst-host=*.facebook.com dst-port=443
+add dst-host=*fbcdn*
+add dst-host=*linkedin*
+add dst-host=*.twimg.com dst-port=443
+add dst-host=api.twitter.com
+add dst-host=api.twitter.com dst-port=443
+add dst-host=*.fb*.com dst-port=443
+add dst-host=*.facebook.com dst-port=80
+add dst-host=*.fb*.com dst-port=80
+add dst-host=*facebook*
+add dst-host=*fbcdn*
+add dst-host=*.facebook.com dst-port=443
+add dst-host=*.fb*.com dst-port=443
+add dst-host=*.facebook.com dst-port=80
+add dst-host=*.fb*.com dst-port=80
+add dst-host=*.google.com dst-port=443
+/ip route
+add distance=2 dst-address=10.10.10.0/24 gateway=afo_aaan1
+add distance=2 dst-address=10.10.11.0/24 gateway=afo_aaan2
+add distance=1 dst-address=10.10.12.0/24 gateway=afo_aaan2
+add check-gateway=ping distance=1 dst-address=10.100.10.0/24 gateway=\
+    afo_aaan1
+add check-gateway=ping distance=1 dst-address=10.100.11.0/24 gateway=\
+    afo_aaan1
+add check-gateway=ping distance=1 dst-address=10.100.20.0/24 gateway=\
+    afo_aaan2
+/radius
+add address=10.100.10.220 secret=ijoi7998ydudujdu service=hotspot \
+    src-address=".replace['IPaddress']." timeout=2s
+/snmp
+set contact=ITSA enabled=yes location=".replace['Name']."
+/system clock
+set time-zone-name=Europe/Warsaw
+/system identity
+set name=".replace['Name']."
+/system routerboard settings
+set silent-boot=no
